@@ -8,10 +8,26 @@ import org.junit.Test;
 
 import java.util.Calendar;
 import java.util.Date;
+import java.util.Random;
 
 public class MyTest {
     private int nextTime = 0;
     private int index = 0;
+
+    @Test
+    public void test3(){
+        for (int i = 0; i < 100; i++) {
+            System.out.println( new Random().nextInt(400));
+        }
+    }
+    @Test
+    public void test2() {
+        Calendar instance = Calendar.getInstance();
+        instance.setTime(new Date());
+        int hour = instance.get(Calendar.HOUR_OF_DAY);
+        int minute = instance.get(Calendar.MINUTE);
+        System.out.println(hour * 60 + minute);
+    }
     @Test
     public void test(){
 

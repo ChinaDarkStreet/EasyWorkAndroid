@@ -4,11 +4,16 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@color/black"
     tools:context=".MainActivity">
+
     <LinearLayout
+        android:id="@+id/main"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:orientation="vertical">
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:paddingTop="140dp"
+        tools:ignore="MissingConstraints">
 
         <TextView
             android:id="@+id/word"
@@ -16,6 +21,7 @@
             android:layout_height="274dp"
             android:text="Hello World!"
             android:textAlignment="center"
+            android:textColor="@color/white"
             android:textSize="50sp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintHorizontal_bias="0.448"
@@ -23,12 +29,14 @@
             app:layout_constraintRight_toRightOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintVertical_bias="0.423" />
+
         <TextView
             android:id="@+id/time"
             android:layout_width="match_parent"
             android:layout_height="84dp"
             android:text="Hello World!"
             android:textAlignment="center"
+            android:textColor="@color/white"
             android:textSize="50sp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintHorizontal_bias="0.448"
@@ -41,45 +49,55 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:orientation="vertical">
+
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content">
+
                 <TextView
-                    android:text="震动时长"
                     android:layout_width="wrap_content"
-                    android:layout_height="wrap_content" />
+                    android:layout_height="wrap_content"
+                    android:text="震动时长"
+                    android:textColor="@color/white" />
 
                 <EditText
                     android:id="@+id/vTime"
                     android:layout_width="80dp"
                     android:layout_height="wrap_content"
                     android:inputType="number"
-                    android:text="1000" />
+                    android:text="1000"
+                    android:textColor="@color/white" />
+
                 <TextView
-                    android:text="震动次数"
                     android:layout_width="wrap_content"
-                    android:layout_height="wrap_content" />
+                    android:layout_height="wrap_content"
+                    android:text="震动次数"
+                    android:textColor="@color/white" />
 
                 <EditText
                     android:id="@+id/vTimes"
                     android:layout_width="80dp"
                     android:layout_height="wrap_content"
                     android:inputType="number"
-                    android:text="5" />
+                    android:text="1"
+                    android:textColor="@color/white" />
 
                 <Switch
                     android:id="@+id/switch1"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="预下课"/>
+                    android:text="预下课" />
 
             </LinearLayout>
+
             <Button
                 android:id="@+id/start_service"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="开始" />
+                android:background="@color/black"
+                android:text="开始"
+                android:textColor="@color/white" />
         </LinearLayout>
 
     </LinearLayout>

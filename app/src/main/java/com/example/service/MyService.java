@@ -7,6 +7,9 @@ import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
+import android.media.Ringtone;
+import android.media.RingtoneManager;
+import android.net.Uri;
 import android.os.Binder;
 import android.os.IBinder;
 import android.os.Vibrator;
@@ -28,12 +31,14 @@ public class MyService extends Service {
     public static final String TAG = "MyService";
     private int[] dts = new int[]{35, 10, 10, 35, 10, 20};
     private int[] dtts = new int[]{35, 45, 55, 90, 100, 120};
+    private int[] ms = new int[]{480, 530, 540, 585, 595, 640, 650, 695, 810, 850, 860, 900, 910, 950, 960, 1000, 1010, 1050, 1080, 1130, 1140, 1190, 1200, 1250};
     private MyBinder mBinder = new MyBinder();
     private boolean running = true;
     private ArrayList<Integer> times = null;
     private ArrayList<Integer> tens = null;
     private Vibrator vibrator = null;
     private int nextTime = 0;
+    private int nextIndex = 0;
     private int index = 0;
     private Intent intent = new Intent(Constant.BORDERCAST_ACTION);
     private Intent intent1 = new Intent(Constant.BORDERCAST_ACTION1);
@@ -72,52 +77,34 @@ public class MyService extends Service {
             notification.defaults = Notification.DEFAULT_SOUND;
             startForeground(818, notification);
         }
-
-        // 初始化 nextTime
-        int time = getTime();
-        int abTime = time - 450;
-        //获取整除后的值
-        int dt = abTime % 120;
-        int base = time - dt;
-        if (dt < dtts[0]) {
-            nextTime = base + dtts[0];
-            index = 0;
-        } else if (dt < dtts[1]) {
-            nextTime = base + dtts[1];
-            index = 1;
-        } else if (dt < dtts[2]) {
-            nextTime = base + dtts[2];
-            index = 2;
-        } else if (dt < dtts[3]) {
-            nextTime = base + dtts[3];
-            index = 3;
-        } else if (dt < dtts[4]) {
-            nextTime = base + dtts[4];
-            index = 4;
-        } else {
-            nextTime = base + dtts[5];
-            index = 5;
-        }
-
-        // 发送广播
-        intent.putExtra(Constant.NEXT_TIME, toTime(setDdtGetShowTime(index)));
-        intent.putExtra(Constant.DT, ddt);
-        sendBroadcast(intent);
+        initNextTime();
 
     }
 
-    private int setDdtGetShowTime(int index) {
-        if (index == 2) {
-            ddt = 10;
-        } else if (index == 5) {
-            ddt = 20;
-        } else {
-            ddt = 45;
-            if (index == 0 || index == 3) {
-                return nextTime + 10;
+    /**
+     * 初始化nextTime , 设置好nextTime时间
+     */
+    private void initNextTime() {
+
+        int curTime = getTime();
+        for (int i = 0; i < ms.length; i++) {
+            int t = ms[i];
+            if (t > curTime) {
+                nextTime = t;
+                nextIndex = i;
+                break;
             }
         }
-        return nextTime;
+        if (nextIndex != 0) {
+            ddt = ms[nextIndex] - ms[nextIndex - 1];
+        }else {
+            ddt = 0;
+        }
+
+        // 发送广播
+        intent.putExtra(Constant.NEXT_TIME, toTime(nextTime));
+        intent.putExtra(Constant.DT, ddt);
+        sendBroadcast(intent);
     }
 
     private String toTime(int t) {
@@ -146,6 +133,7 @@ public class MyService extends Service {
 
     @Override
     public IBinder onBind(Intent intent) {
+        Log.d(TAG, "onBind() executed");
         return mBinder;
     }
 
@@ -158,60 +146,10 @@ public class MyService extends Service {
     private long[] test = new long[]{1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000};
 
     public class MyBinder extends Binder {
-        public void startDownload(int vTime, int vTimes) {
-//
-//
-//            AlarmManager manager = (AlarmManager) getSystemService(ALARM_SERVICE);
-//            int five = 5000; // 这是5s
-//            long triggerAtTime = SystemClock.elapsedRealtime() + five;
-//            Intent i = new Intent(this, MainActivity.MsgReceiver.class);
-//            PendingIntent pi = PendingIntent.getBroadcast(this, 0, i, 0);
-//            manager.setExact(AlarmManager.ELAPSED_REALTIME_WAKEUP, triggerAtTime, pi);
-
-            timer = new Timer();
-            TimerTask task;
-            task = new TimerTask() {
-                @Override
-                public void run() {
-                    if (getTime() >= nextTime) {
-                        index = ++index % 6;
-                        nextTime += dts[index];
-
-                        // 发送广播
-                        intent.putExtra(Constant.NEXT_TIME, toTime(setDdtGetShowTime(index)));
-                        intent.putExtra(Constant.DT, ddt);
-                        sendBroadcast(intent);
-
-                        if (index == 1 || index == 4) {
-                            vibrator.vibrate(1000);
-                        } else {
-                            vibrator.vibrate(test, -1);
-                        }
-                        Log.d(TAG, String.format("index = %d, nextTime = %s, ddt = %d", index, nextTime, ddt));
-                    }
-                    sendBroadcast(intent1);
-                }
-            };
-            timer.schedule(task, 2000, 1000);
-//            timer.cancel();
-//            new Thread(new Runnable() {
-//                @Override
-//                public void run() {
-//                    while (running) {
-//
-//                        try {
-//                            Thread.sleep(1000);
-//                        } catch (InterruptedException e) {
-//                            e.printStackTrace();
-//                        }
-//                    }
-//                }
-//            }).start();
-            Log.d("TAG", "startDownload() executed");
-            // 执行具体的下载任务
-        }
 
         public void startDownload(int vTime, int vTimes, final boolean isAlert) {
+            running = true;
+            initNextTime();
             updateTest(vTime, vTimes);
             timer = new Timer();
             TimerTask task;
@@ -219,22 +157,27 @@ public class MyService extends Service {
                 @Override
                 public void run() {
                     if (getTime() >= nextTime) {
-                        index = ++index % 6;
-                        nextTime += dts[index];
+                        nextIndex++;
+                        if (nextIndex >= ms.length){
+                            stop();
+                            return;
+                        }
+                        nextTime = ms[nextIndex];
+                        ddt = ms[nextIndex] - ms[nextIndex-1];
 
                         // 发送广播
-                        intent.putExtra(Constant.NEXT_TIME, toTime(setDdtGetShowTime(index)));
+                        intent.putExtra(Constant.NEXT_TIME, toTime(nextTime));
                         intent.putExtra(Constant.DT, ddt);
                         sendBroadcast(intent);
-
-                        if (index == 1 || index == 4) {
-                            if (isAlert) {
-                                vibrator.vibrate(1000);
-                            }
-                        } else {
+                        if (nextIndex % 2 != 0){
                             vibrator.vibrate(test, -1);
+                        }else {
+                            vibrator.vibrate(1000);
                         }
-                        Log.d(TAG, String.format("index = %d, nextTime = %s, ddt = %d", index, nextTime, ddt));
+                        Uri uri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
+                        Ringtone rt = RingtoneManager.getRingtone(getApplicationContext(), uri);
+                        rt.play();
+                        Log.d(TAG, String.format("index = %d, nextTime = %s, ddt = %d", nextIndex, nextTime, ddt));
                     }
                     sendBroadcast(intent1);
                 }
@@ -244,11 +187,18 @@ public class MyService extends Service {
         }
 
         public void stop() {
-            timer.cancel();
             running = false;
             stopForeground(true);
+            timer.cancel();
         }
 
+        public boolean isRunning(){
+            return running;
+        }
+
+        public void initText() {
+            initNextTime();
+        }
     }
 
     private void updateTest(int vTime, int vTimes) {
