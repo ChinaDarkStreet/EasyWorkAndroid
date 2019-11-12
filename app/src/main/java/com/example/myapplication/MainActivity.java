@@ -103,8 +103,8 @@ public class MainActivity extends Activity implements View.OnClickListener {
         unbindService(connection);
         super.onDestroy();
     }
-    
-    
+
+
     private ServiceConnection connection = new ServiceConnection() {
 
         @Override
@@ -124,21 +124,15 @@ public class MainActivity extends Activity implements View.OnClickListener {
             case R.id.start_service:
                 Button button = (Button) view;
                 String text = (String) button.getText();
-                if (text.equals("开始")){
-                    int vTime = Integer.parseInt(((EditText)findViewById(R.id.vTime)).getText().toString());
-                    int vTimes = Integer.parseInt(((EditText)findViewById(R.id.vTimes)).getText().toString());
-                    boolean isAlert = ((Switch)findViewById(R.id.switch1)).isChecked();
-
-                    PowerManager pm = (PowerManager)getSystemService(Context.POWER_SERVICE);
-                    assert pm != null;
-                    wakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, getClass().getName());
-                    wakeLock.acquire(12 * 60 * 60 * 1000);
+                if (text.equals("开始")) {
+                    int vTime = Integer.parseInt(((EditText) findViewById(R.id.vTime)).getText().toString());
+                    int vTimes = Integer.parseInt(((EditText) findViewById(R.id.vTimes)).getText().toString());
+                    boolean isAlert = ((Switch) findViewById(R.id.switch1)).isChecked();
 
                     myBinder.startDownload(vTime, vTimes, isAlert);
                     button.setText("结束");
-                }else{
+                } else {
                     myBinder.stop();
-                    wakeLock.release();
                     button.setText("开始");
                 }
                 break;
@@ -152,15 +146,15 @@ public class MainActivity extends Activity implements View.OnClickListener {
         @SuppressLint("DefaultLocale")
         @Override
         public void onReceive(Context context, Intent intent) {
-            if(!serviceInitButton){
-                if(myBinder != null){
+            if (!serviceInitButton) {
+                if (myBinder != null) {
                     myBinder.initText();
                     button.setText("结束");
                     serviceInitButton = true;
                 }
             }
 
-            if (intent.getAction().equals(Constant.BORDERCAST_ACTION)){
+            if (intent.getAction().equals(Constant.BORDERCAST_ACTION)) {
                 //拿到进度，更新UI
                 String nextTime = intent.getStringExtra(Constant.NEXT_TIME);
                 int dt = intent.getIntExtra(Constant.DT, 0);
@@ -169,9 +163,9 @@ public class MainActivity extends Activity implements View.OnClickListener {
                         "下个时间点:\n" +
                         "%s", dt, nextTime));
                 Log.d(TAG, String.format("nextTime = %s, dt = %d", nextTime, dt));
-            }else {
+            } else {
                 String hms = TimeUtil.getHms();
-                if (hms.endsWith("00")){
+                if (hms.endsWith("00")) {
                     main.setPadding(0, random.nextInt(400) + 80, 0, 0);
                 }
                 text2.setText(hms);

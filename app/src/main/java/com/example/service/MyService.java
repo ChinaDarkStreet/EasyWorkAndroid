@@ -12,6 +12,7 @@ import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.IBinder;
+import android.os.PowerManager;
 import android.os.Vibrator;
 import android.util.Log;
 
@@ -31,7 +32,8 @@ public class MyService extends Service {
     public static final String TAG = "MyService";
     private int[] dts = new int[]{35, 10, 10, 35, 10, 20};
     private int[] dtts = new int[]{35, 45, 55, 90, 100, 120};
-    private int[] ms = new int[]{480, 530, 540, 585, 595, 640, 650, 695, 810, 850, 860, 900, 910, 950, 960, 1000, 1010, 1050, 1080, 1130, 1140, 1190, 1200, 1250};
+    private String msStr = "08:00,08:50,09:00,09:45,09:55,10:40,10:50,11:35,13:30,14:10,14:20,15:00,15:10,15:50,16:00,16:40,16:50,17:30,17:50,18:30,18:40,19:20,19:30,20:10,20:20,21:00";
+    private int[] ms = null;
     private MyBinder mBinder = new MyBinder();
     private boolean running = true;
     private ArrayList<Integer> times = null;
@@ -49,6 +51,16 @@ public class MyService extends Service {
     public void onCreate() {
         Log.d(TAG, "onCreate() executed");
         super.onCreate();
+
+        String[] mss = msStr.split(",");
+        ms = new int[mss.length];
+        for (int i = 0; i < mss.length; i++) {
+            String s = mss[i];
+            String[] hm = s.split(":");
+            int h = Integer.valueOf(hm[0]);
+            int m = Integer.valueOf(hm[1]);
+            ms[i] = h*60 + m;
+        }
 
         vibrator = (Vibrator) getSystemService(Service.VIBRATOR_SERVICE);
 
@@ -146,8 +158,16 @@ public class MyService extends Service {
     private long[] test = new long[]{1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000};
 
     public class MyBinder extends Binder {
+        private PowerManager.WakeLock wakeLock = null;
 
         public void startDownload(int vTime, int vTimes, final boolean isAlert) {
+            PowerManager pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
+            assert pm != null;
+
+            //保持唤醒
+            wakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, getClass().getName());
+            wakeLock.acquire(12 * 60 * 60 * 1000);
+
             running = true;
             initNextTime();
             updateTest(vTime, vTimes);
@@ -187,6 +207,9 @@ public class MyService extends Service {
         }
 
         public void stop() {
+            if (wakeLock != null){
+                wakeLock.release();
+            }
             running = false;
             stopForeground(true);
             timer.cancel();
