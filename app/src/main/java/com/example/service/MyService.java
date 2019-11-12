@@ -7,6 +7,7 @@ import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
+import android.media.MediaPlayer;
 import android.media.Ringtone;
 import android.media.RingtoneManager;
 import android.net.Uri;
@@ -46,6 +47,7 @@ public class MyService extends Service {
     private Intent intent1 = new Intent(Constant.BORDERCAST_ACTION1);
     private int ddt = 0;
     private Timer timer = null;
+    private MediaPlayer mediaPlayer = null;
 
     @Override
     public void onCreate() {
@@ -59,10 +61,12 @@ public class MyService extends Service {
             String[] hm = s.split(":");
             int h = Integer.valueOf(hm[0]);
             int m = Integer.valueOf(hm[1]);
-            ms[i] = h*60 + m;
+            ms[i] = h * 60 + m;
         }
 
         vibrator = (Vibrator) getSystemService(Service.VIBRATOR_SERVICE);
+
+        mediaPlayer = MediaPlayer.create(this, R.raw.alarm);
 
         //适配8.0service
         NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
@@ -109,7 +113,7 @@ public class MyService extends Service {
         }
         if (nextIndex != 0) {
             ddt = ms[nextIndex] - ms[nextIndex - 1];
-        }else {
+        } else {
             ddt = 0;
         }
 
@@ -178,25 +182,26 @@ public class MyService extends Service {
                 public void run() {
                     if (getTime() >= nextTime) {
                         nextIndex++;
-                        if (nextIndex >= ms.length){
+                        if (nextIndex >= ms.length) {
                             stop();
                             return;
                         }
                         nextTime = ms[nextIndex];
-                        ddt = ms[nextIndex] - ms[nextIndex-1];
+                        ddt = ms[nextIndex] - ms[nextIndex - 1];
 
                         // 发送广播
                         intent.putExtra(Constant.NEXT_TIME, toTime(nextTime));
                         intent.putExtra(Constant.DT, ddt);
                         sendBroadcast(intent);
-                        if (nextIndex % 2 != 0){
+                        if (nextIndex % 2 != 0) {
                             vibrator.vibrate(test, -1);
-                        }else {
+                        } else {
                             vibrator.vibrate(1000);
                         }
-                        Uri uri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
+                        mediaPlayer.start();
+                        /*Uri uri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
                         Ringtone rt = RingtoneManager.getRingtone(getApplicationContext(), uri);
-                        rt.play();
+                        rt.play();*/
                         Log.d(TAG, String.format("index = %d, nextTime = %s, ddt = %d", nextIndex, nextTime, ddt));
                     }
                     sendBroadcast(intent1);
@@ -207,7 +212,7 @@ public class MyService extends Service {
         }
 
         public void stop() {
-            if (wakeLock != null){
+            if (wakeLock != null) {
                 wakeLock.release();
             }
             running = false;
@@ -215,7 +220,7 @@ public class MyService extends Service {
             timer.cancel();
         }
 
-        public boolean isRunning(){
+        public boolean isRunning() {
             return running;
         }
 

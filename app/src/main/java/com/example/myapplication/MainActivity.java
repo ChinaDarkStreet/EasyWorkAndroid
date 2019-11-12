@@ -8,6 +8,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
+import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.PowerManager;
@@ -43,6 +44,7 @@ public class MainActivity extends Activity implements View.OnClickListener {
     private boolean serviceInitButton;
     private LinearLayout main;
     private Random random = new Random();
+    private MediaPlayer mediaPlayer = null;
 
     @Override
     protected void onStart() {
@@ -84,7 +86,10 @@ public class MainActivity extends Activity implements View.OnClickListener {
         // service 初始化按钮标志
         serviceInitButton = false;
 
+        mediaPlayer = MediaPlayer.create(this, R.raw.alarm);
+
         button.setOnClickListener(this);
+        findViewById(R.id.test).setOnClickListener(this);
 
         IntentFilter intentFilter = new IntentFilter();
         intentFilter.addAction(Constant.BORDERCAST_ACTION);
@@ -135,6 +140,9 @@ public class MainActivity extends Activity implements View.OnClickListener {
                     myBinder.stop();
                     button.setText("开始");
                 }
+                break;
+            case R.id.test:
+                mediaPlayer.start();
                 break;
             default:
                 break;
