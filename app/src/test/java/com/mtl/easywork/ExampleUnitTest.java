@@ -1,4 +1,4 @@
-package com.example.myapplication;
+package com.mtl.easywork;
 
 import org.junit.Test;
 

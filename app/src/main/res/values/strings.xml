@@ -1,6 +1,8 @@
 <resources>
-    <string name="app_name">My Application</string>
-    <string name="start">开始</string>
-    <string name="stopService">停止服务</string>
-    <string name="startService">启动服务</string>
+    <string name="app_name">EasyWork</string>
+    <string name="pausing">未运行</string>
+    <string name="test">测试</string>
+    <string name="nextTime">19:30:00</string>
+    <string name="durTime">40分钟</string>
+    <string name="curTime">19:00:00</string>
 </resources>
