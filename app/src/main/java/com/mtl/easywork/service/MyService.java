@@ -76,6 +76,7 @@ public class MyService extends Service {
                 public void run() {
                     Log.d("TAG", "打印时间: " + new Date().
                             toString());
+                    vibrator = (Vibrator) getSystemService(Service.VIBRATOR_SERVICE);
                     vibrator.vibrate(VibrationEffect.createOneShot(1000, VibrationEffect.DEFAULT_AMPLITUDE));
                 }
             }).start();
@@ -95,7 +96,6 @@ public class MyService extends Service {
         Log.d(TAG, "onCreate() executed");
         //初始化振动器
         mediaPlayer = MediaPlayer.create(this, R.raw.alarm);
-        vibrator = (Vibrator) getSystemService(Service.VIBRATOR_SERVICE);
         mainActivityIntent = new Intent(this, AlarmReceiver.class);
 
         initMs();
