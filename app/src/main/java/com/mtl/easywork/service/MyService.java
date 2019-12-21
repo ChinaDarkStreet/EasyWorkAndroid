@@ -70,16 +70,8 @@ public class MyService extends Service {
             intent.putExtra(Constant.NEXT_TIME, toTime(nextTime));
             intent.putExtra(Constant.DT, ddt);
             sendBroadcast(intent);
-
-            new Thread(new Runnable() {
-                @Override
-                public void run() {
-                    Log.d("TAG", "打印时间: " + new Date().
-                            toString());
-                    vibrator = (Vibrator) getSystemService(Service.VIBRATOR_SERVICE);
-                    vibrator.vibrate(VibrationEffect.createOneShot(1000, VibrationEffect.DEFAULT_AMPLITUDE));
-                }
-            }).start();
+            vibrator = (Vibrator) getSystemService(Service.VIBRATOR_SERVICE);
+            vibrator.vibrate(VibrationEffect.createOneShot(1000, VibrationEffect.DEFAULT_AMPLITUDE));
         }
         int five = (nextTime * 60 - curSecondTime) * 1000;
         Log.i(TAG, "five = " + five);
@@ -150,7 +142,7 @@ public class MyService extends Service {
         Log.d(TAG, "onDestroy() executed");
     }
 
-    //private long[] test = new long[]{1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000};
+    private long[] test = new long[]{1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000, 1000};
 
     public class MyBinder extends Binder {
 
